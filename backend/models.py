@@ -147,3 +147,130 @@ class TransferResponse(BaseModel):
     status: str
     summary: str
 
+# New models for offboarding view
+class DataSourcesSummary(BaseModel):
+    documents: int
+    chat_messages: int
+    emails: int
+    total: int
+
+class KnowledgeNode(BaseModel):
+    id: str
+    topic: str
+    x: float
+    y: float
+    connections: List[str] = []
+    snippet: str = ""
+
+class KnowledgeMapping(BaseModel):
+    nodes: List[KnowledgeNode]
+    connections: List[dict] = []
+
+class TimelineDataPoint(BaseModel):
+    week: str
+    commits: int
+    incidents: int
+    docs_authored: int
+
+class WorkPatternTimeline(BaseModel):
+    data_points: List[TimelineDataPoint]
+
+class ExtractionLog(BaseModel):
+    id: str
+    message: str
+    timestamp: str
+    status: str  # completed, processing
+
+class OffboardingView(BaseModel):
+    employee_id: str
+    employee_name: str
+    role: str
+    days_until_exit: int
+    data_sources: DataSourcesSummary
+    knowledge_mapping: KnowledgeMapping
+    work_timeline: WorkPatternTimeline
+    extraction_log: List[ExtractionLog]
+
+# New models for capsule builder view
+class Skill(BaseModel):
+    name: str
+    confidence: int  # 0-100
+    sources_count: int
+
+class SkillsMatrix(BaseModel):
+    skills: List[Skill]
+
+class Responsibility(BaseModel):
+    id: str
+    title: str
+    frequency: str
+    criticality: str
+
+class SOPDetail(BaseModel):
+    id: str
+    title: str
+    steps: List[str]
+    estimated_time: int
+    category: str
+
+class RiskGap(BaseModel):
+    id: str
+    type: str  # undocumented_workflow, tribal_knowledge
+    description: str
+    severity: str  # low, medium, high
+
+class CapsuleBuilderView(BaseModel):
+    employee_id: str
+    employee_name: str
+    role: str
+    skills_matrix: SkillsMatrix
+    responsibilities: List[Responsibility]
+    sops: List[SOPDetail]
+    tutorials: List[Tutorial]
+    risk_gaps: List[RiskGap]
+    total_previous_employees: int
+
+# New models for new employee view
+class OnboardingStep(BaseModel):
+    id: str
+    title: str
+    status: str  # completed, in-progress, locked
+    order: int
+
+class SkillGap(BaseModel):
+    skill: str
+    current_level: int  # 0-100
+    target_level: int  # 0-100
+
+class SkillsGapAnalysis(BaseModel):
+    gaps: List[SkillGap]
+
+class LearningModule(BaseModel):
+    id: str
+    title: str
+    description: str
+    lessons: List[str]
+    unlocked: bool
+    order: int
+
+class ScenarioOption(BaseModel):
+    id: str
+    text: str
+    correct: bool
+    explanation: str
+
+class Scenario(BaseModel):
+    id: str
+    title: str
+    description: str
+    options: List[ScenarioOption]
+    match_percentage: Optional[int] = None
+
+class NewEmployeeView(BaseModel):
+    employee_id: str
+    employee_name: str
+    role: str
+    onboarding_path: List[OnboardingStep]
+    skills_gaps: SkillsGapAnalysis
+    learning_modules: List[LearningModule]
+    scenarios: List[Scenario]

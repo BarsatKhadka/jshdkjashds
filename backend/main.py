@@ -6,13 +6,14 @@ import random
 from models import (
     Employee, EmployeeDetail, KnowledgeCapsule, Document, 
     ChatMessage, Email, Tutorial, SOP, TransferRequest, TransferResponse,
-    AnalysisRequest, AnalysisResponse
+    AnalysisRequest, AnalysisResponse, OffboardingView, CapsuleBuilderView, NewEmployeeView
 )
 from mock_data import (
     get_mock_employees, get_mock_employee_detail, 
     generate_knowledge_capsule, get_mock_documents,
     get_mock_chats, get_mock_emails, generate_tutorials,
-    generate_sops
+    generate_sops, generate_offboarding_view, generate_capsule_builder_view,
+    generate_new_employee_view
 )
 
 app = FastAPI(
@@ -199,6 +200,42 @@ async def transfer_knowledge(from_id: str, to_id: str, request: Optional[Transfe
     )
     
     return response
+
+@app.get("/api/employees/{employee_id}/offboarding", response_model=OffboardingView)
+async def get_offboarding_view(employee_id: str):
+    """Get offboarding view for an employee"""
+    employee = next((e for e in employees_db if e.id == employee_id), None)
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    view = generate_offboarding_view(employee_id)
+    if not view:
+        raise HTTPException(status_code=404, detail="Could not generate offboarding view")
+    return view
+
+@app.get("/api/employees/{employee_id}/capsule-builder", response_model=CapsuleBuilderView)
+async def get_capsule_builder_view(employee_id: str):
+    """Get capsule builder view for an employee"""
+    employee = next((e for e in employees_db if e.id == employee_id), None)
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    view = generate_capsule_builder_view(employee_id)
+    if not view:
+        raise HTTPException(status_code=404, detail="Could not generate capsule builder view")
+    return view
+
+@app.get("/api/employees/{employee_id}/new-employee-view", response_model=NewEmployeeView)
+async def get_new_employee_view(employee_id: str):
+    """Get new employee onboarding view"""
+    employee = next((e for e in employees_db if e.id == employee_id), None)
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    view = generate_new_employee_view(employee_id)
+    if not view:
+        raise HTTPException(status_code=404, detail="Could not generate new employee view")
+    return view
 
 if __name__ == "__main__":
     import uvicorn

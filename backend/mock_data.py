@@ -3,15 +3,19 @@ import random
 from typing import List, Optional
 from models import (
     Employee, EmployeeDetail, KnowledgeCapsule, KnowledgeArea,
-    Document, ChatMessage, Email, Tutorial, SOP
+    Document, ChatMessage, Email, Tutorial, SOP,
+    OffboardingView, DataSourcesSummary, KnowledgeNode, KnowledgeMapping,
+    TimelineDataPoint, WorkPatternTimeline, ExtractionLog,
+    CapsuleBuilderView, SkillsMatrix, Skill, Responsibility, SOPDetail, RiskGap,
+    NewEmployeeView, OnboardingStep, SkillGap, SkillsGapAnalysis, LearningModule, Scenario, ScenarioOption
 )
 
 # Realistic employee data
 EMPLOYEES_DATA = [
     {
         "id": "emp_001",
-        "name": "Sarah Chen",
-        "email": "sarah.chen@company.com",
+        "name": "Daniel",
+        "email": "daniel@company.com",
         "role": "Senior Software Engineer",
         "department": "Engineering",
         "start_date": "2021-03-15",
@@ -85,6 +89,19 @@ EMPLOYEES_DATA = [
         "projects": ["Engineering Excellence", "Team Scaling", "Technical Roadmap"],
         "direct_reports": ["emp_002", "emp_004", "emp_005"],
         "manager_id": None
+    },
+    {
+        "id": "emp_007",
+        "name": "Sarah",
+        "email": "sarah@company.com",
+        "role": "Senior Software Engineer",
+        "department": "Engineering",
+        "start_date": "2024-01-15",
+        "bio": "New Senior Software Engineer joining the team.",
+        "skills": ["Python", "AWS", "Docker"],
+        "projects": [],
+        "direct_reports": [],
+        "manager_id": "emp_005"
     }
 ]
 
@@ -338,7 +355,7 @@ def generate_tutorials(employee_id: Optional[str] = None) -> List[Tutorial]:
             description="Step-by-step guide to configure authentication in the API Gateway",
             content="This tutorial covers the complete setup process for API Gateway authentication including JWT token validation, API key management, and OAuth integration.",
             employee_id=employee_id or "emp_001",
-            employee_name="Sarah Chen",
+            employee_name="Daniel",
             knowledge_area="API Design and Architecture",
             difficulty_level="intermediate",
             estimated_time_minutes=45,
@@ -358,7 +375,7 @@ def generate_tutorials(employee_id: Optional[str] = None) -> List[Tutorial]:
             description="Complete guide for migrating from MySQL to PostgreSQL",
             content="This tutorial walks through the entire migration process including schema conversion, data migration, and application updates.",
             employee_id=employee_id or "emp_001",
-            employee_name="Sarah Chen",
+            employee_name="Daniel",
             knowledge_area="Database Optimization",
             difficulty_level="advanced",
             estimated_time_minutes=120,
@@ -378,8 +395,8 @@ def generate_tutorials(employee_id: Optional[str] = None) -> List[Tutorial]:
             title="Kubernetes Deployment Best Practices",
             description="Learn how to deploy applications on Kubernetes following production best practices",
             content="Comprehensive guide covering resource management, health checks, rolling updates, and monitoring.",
-            employee_id=employee_id or "emp_003",
-            employee_name="Emily Watson",
+            employee_id=employee_id or "emp_001",
+            employee_name="Daniel",
             knowledge_area="Kubernetes and Container Orchestration",
             difficulty_level="intermediate",
             estimated_time_minutes=60,
@@ -406,7 +423,7 @@ def generate_sops(employee_id: Optional[str] = None) -> List[SOP]:
             description="Standard procedure for handling payment gateway incidents",
             procedure="When a payment gateway incident occurs: 1) Check monitoring dashboard for errors, 2) Verify payment provider status page, 3) Check database connection pool, 4) Review recent deployments, 5) Escalate if unresolved within 15 minutes",
             employee_id=employee_id or "emp_001",
-            employee_name="Sarah Chen",
+            employee_name="Daniel",
             category="incident_response",
             steps=[
                 "Access monitoring dashboard",
@@ -425,8 +442,8 @@ def generate_sops(employee_id: Optional[str] = None) -> List[SOP]:
             title="Production Deployment Checklist",
             description="Step-by-step checklist for production deployments",
             procedure="Before deploying to production: 1) Run all tests, 2) Review code changes, 3) Check database migrations, 4) Verify configuration, 5) Notify team, 6) Monitor during deployment, 7) Verify post-deployment",
-            employee_id=employee_id or "emp_003",
-            employee_name="Emily Watson",
+            employee_id=employee_id or "emp_001",
+            employee_name="Daniel",
             category="deployment",
             steps=[
                 "Run test suite",
@@ -448,8 +465,8 @@ def generate_sops(employee_id: Optional[str] = None) -> List[SOP]:
             title="Database Connection Pool Troubleshooting",
             description="Procedure for diagnosing and fixing database connection pool issues",
             procedure="If experiencing connection pool exhaustion: 1) Check current pool usage, 2) Review connection timeout settings, 3) Check for connection leaks, 4) Review query performance, 5) Adjust pool size if needed",
-            employee_id=employee_id or "emp_002",
-            employee_name="Michael Rodriguez",
+            employee_id=employee_id or "emp_001",
+            employee_name="Daniel",
             category="troubleshooting",
             steps=[
                 "Check pool metrics in monitoring",
@@ -467,3 +484,232 @@ def generate_sops(employee_id: Optional[str] = None) -> List[SOP]:
     
     return sops
 
+# New functions for offboarding view
+def generate_offboarding_view(employee_id: str) -> OffboardingView:
+    """Generate offboarding view data"""
+    employee = next((e for e in EMPLOYEES_DATA if e["id"] == employee_id), None)
+    if not employee:
+        return None
+    
+    # Knowledge mapping nodes
+    nodes = [
+        KnowledgeNode(id="node_1", topic="CI/CD", x=100, y=100, connections=["node_2", "node_3"],
+                     snippet="Maintains CI/CD pipelines, handles deployment failures, manages build configurations"),
+        KnowledgeNode(id="node_2", topic="IAM", x=300, y=100, connections=["node_1", "node_4"],
+                     snippet="Manages IAM permissions, patches IAM drift, handles access control policies"),
+        KnowledgeNode(id="node_3", topic="Scaling", x=100, y=300, connections=["node_1", "node_5"],
+                     snippet="Monitors scaling thresholds, handles auto-scaling configurations, optimizes resource usage"),
+        KnowledgeNode(id="node_4", topic="On-call Playbooks", x=300, y=300, connections=["node_2", "node_5"],
+                     snippet="Created incident response playbooks, established on-call procedures, documented troubleshooting steps"),
+        KnowledgeNode(id="node_5", topic="Incident Logs", x=200, y=400, connections=["node_3", "node_4"],
+                     snippet="Maintains incident logs, analyzes patterns, creates post-mortem reports")
+    ]
+    
+    connections = [
+        {"from": "node_1", "to": "node_2"},
+        {"from": "node_1", "to": "node_3"},
+        {"from": "node_2", "to": "node_4"},
+        {"from": "node_3", "to": "node_5"},
+        {"from": "node_4", "to": "node_5"}
+    ]
+    
+    # Timeline data
+    timeline_data = []
+    for i in range(12):
+        week = (datetime.now() - timedelta(weeks=12-i)).strftime("%Y-%m-%d")
+        timeline_data.append(TimelineDataPoint(
+            week=week,
+            commits=random.randint(5, 25),
+            incidents=random.randint(0, 3),
+            docs_authored=random.randint(0, 2)
+        ))
+    
+    # Extraction log
+    extraction_log = [
+        ExtractionLog(id="log_1", message="Extracted 14 processes from emails", timestamp=(datetime.now() - timedelta(minutes=5)).isoformat(), status="completed"),
+        ExtractionLog(id="log_2", message="Identified 8 recurring workflows", timestamp=(datetime.now() - timedelta(minutes=4)).isoformat(), status="completed"),
+        ExtractionLog(id="log_3", message="Mapped 22 responsibilities", timestamp=(datetime.now() - timedelta(minutes=3)).isoformat(), status="completed"),
+        ExtractionLog(id="log_4", message="Found 11 undocumented tribal-knowledge tasks", timestamp=(datetime.now() - timedelta(minutes=2)).isoformat(), status="completed"),
+        ExtractionLog(id="log_5", message="Analyzing knowledge graph connections...", timestamp=(datetime.now() - timedelta(minutes=1)).isoformat(), status="processing")
+    ]
+    
+    return OffboardingView(
+        employee_id=employee_id,
+        employee_name=employee["name"],
+        role=employee["role"],
+        days_until_exit=7,
+        data_sources=DataSourcesSummary(documents=38, chat_messages=198, emails=109, total=345),
+        knowledge_mapping=KnowledgeMapping(nodes=nodes, connections=connections),
+        work_timeline=WorkPatternTimeline(data_points=timeline_data),
+        extraction_log=extraction_log
+    )
+
+# New functions for capsule builder view
+def generate_capsule_builder_view(employee_id: str) -> CapsuleBuilderView:
+    """Generate capsule builder view data"""
+    employee = next((e for e in EMPLOYEES_DATA if e["id"] == employee_id), None)
+    if not employee:
+        return None
+    
+    skills = [
+        Skill(name="AWS", confidence=92, sources_count=45),
+        Skill(name="Kubernetes", confidence=88, sources_count=38),
+        Skill(name="CI/CD", confidence=95, sources_count=52),
+        Skill(name="Incident Handling", confidence=85, sources_count=28),
+        Skill(name="IAM", confidence=78, sources_count=22),
+        Skill(name="Python", confidence=90, sources_count=41),
+        Skill(name="Docker", confidence=87, sources_count=35),
+        Skill(name="PostgreSQL", confidence=82, sources_count=29)
+    ]
+    
+    responsibilities = [
+        Responsibility(id="resp_1", title="Maintain CI/CD pipelines", frequency="Daily", criticality="High"),
+        Responsibility(id="resp_2", title="Patch IAM drift", frequency="Weekly", criticality="High"),
+        Responsibility(id="resp_3", title="Run weekly infra cleanup", frequency="Weekly", criticality="Medium"),
+        Responsibility(id="resp_4", title="Monitor scaling thresholds", frequency="Daily", criticality="High"),
+        Responsibility(id="resp_5", title="Handle incident Sev2", frequency="On-call", criticality="Critical"),
+        Responsibility(id="resp_6", title="Review deployment logs", frequency="Daily", criticality="Medium")
+    ]
+    
+    sops_detail = [
+        SOPDetail(
+            id="sop_det_1",
+            title="Blue/Green Deployment Failure Diagnosis",
+            steps=[
+                "Validate active container version",
+                "Inspect build logs for mismatch",
+                "Re-run healthchecks on inactive pool",
+                "Roll back to previous revision",
+                "Verify service health",
+                "Document root cause"
+            ],
+            estimated_time=15,
+            category="deployment"
+        ),
+        SOPDetail(
+            id="sop_det_2",
+            title="IAM Permission Drift Resolution",
+            steps=[
+                "Identify drifted permissions",
+                "Compare with expected state",
+                "Review change history",
+                "Apply corrective permissions",
+                "Verify access restoration",
+                "Update documentation"
+            ],
+            estimated_time=20,
+            category="security"
+        )
+    ]
+    
+    risk_gaps = [
+        RiskGap(id="risk_1", type="undocumented_workflow", description="6 undocumented workflows identified", severity="high"),
+        RiskGap(id="risk_2", type="tribal_knowledge", description="2 high-risk tribal knowledge tasks", severity="high")
+    ]
+    
+    return CapsuleBuilderView(
+        employee_id=employee_id,
+        employee_name=employee["name"],
+        role=employee["role"],
+        skills_matrix=SkillsMatrix(skills=skills),
+        responsibilities=responsibilities,
+        sops=sops_detail,
+        tutorials=generate_tutorials(employee_id),
+        risk_gaps=risk_gaps,
+        total_previous_employees=1
+    )
+
+# New functions for new employee view
+def generate_new_employee_view(employee_id: str) -> NewEmployeeView:
+    """Generate new employee onboarding view"""
+    employee = next((e for e in EMPLOYEES_DATA if e["id"] == employee_id), None)
+    if not employee:
+        return None
+    
+    onboarding_steps = [
+        OnboardingStep(id="step_1", title="Fundamentals of Our Infra", status="completed", order=1),
+        OnboardingStep(id="step_2", title="CI/CD Workflows", status="completed", order=2),
+        OnboardingStep(id="step_3", title="Incident Response", status="completed", order=3),
+        OnboardingStep(id="step_4", title="IAM Permissions", status="in-progress", order=4),
+        OnboardingStep(id="step_5", title="Scaling Playbook", status="locked", order=5)
+    ]
+    
+    skill_gaps = SkillsGapAnalysis(gaps=[
+        SkillGap(skill="AWS", current_level=30, target_level=92),
+        SkillGap(skill="Kubernetes", current_level=25, target_level=88),
+        SkillGap(skill="CI/CD", current_level=40, target_level=95),
+        SkillGap(skill="Incident Handling", current_level=20, target_level=85),
+        SkillGap(skill="IAM", current_level=15, target_level=78)
+    ])
+    
+    learning_modules = [
+        LearningModule(
+            id="module_1",
+            title="Understanding Our CI/CD Pipelines",
+            description="Learn how our CI/CD system works",
+            lessons=["Pipeline Overview", "Build Process", "Deployment Strategy", "Rollback Procedures"],
+            unlocked=True,
+            order=1
+        ),
+        LearningModule(
+            id="module_2",
+            title="Common Deployment Failures",
+            description="Identify and resolve common deployment issues",
+            lessons=["Failure Patterns", "Diagnosis Steps", "Resolution Techniques", "Prevention"],
+            unlocked=True,
+            order=2
+        ),
+        LearningModule(
+            id="module_3",
+            title="How to Diagnose IAM Permission Drift",
+            description="Master IAM permission management",
+            lessons=["IAM Basics", "Drift Detection", "Resolution Steps", "Best Practices"],
+            unlocked=True,
+            order=3
+        ),
+        LearningModule(
+            id="module_4",
+            title="Weekly Infrastructure Maintenance Routine",
+            description="Learn the weekly maintenance tasks",
+            lessons=["Cleanup Tasks", "Monitoring Checks", "Health Verifications", "Documentation"],
+            unlocked=False,
+            order=4
+        )
+    ]
+    
+    scenarios = [
+        Scenario(
+            id="scenario_1",
+            title="ECS Service Unhealthy",
+            description="An ECS service is showing as unhealthy. What do you do?",
+            options=[
+                ScenarioOption(id="opt_1", text="Re-run healthchecks", correct=True, explanation="This matches Daniel's troubleshooting behavior 92%"),
+                ScenarioOption(id="opt_2", text="Roll back revision", correct=False, explanation="Try healthchecks first"),
+                ScenarioOption(id="opt_3", text="Scale task count", correct=False, explanation="Not the first step"),
+                ScenarioOption(id="opt_4", text="View logs", correct=True, explanation="This matches Daniel's troubleshooting behavior 88%")
+            ],
+            match_percentage=92
+        ),
+        Scenario(
+            id="scenario_2",
+            title="IAM Permission Denied",
+            description="A service is getting IAM permission denied errors. How do you resolve?",
+            options=[
+                ScenarioOption(id="opt_5", text="Check IAM policy", correct=True, explanation="This matches Daniel's troubleshooting behavior 95%"),
+                ScenarioOption(id="opt_6", text="Restart service", correct=False, explanation="Not the right approach"),
+                ScenarioOption(id="opt_7", text="Patch IAM drift", correct=True, explanation="This matches Daniel's troubleshooting behavior 90%"),
+                ScenarioOption(id="opt_8", text="Contact support", correct=False, explanation="Try troubleshooting first")
+            ],
+            match_percentage=95
+        )
+    ]
+    
+    return NewEmployeeView(
+        employee_id=employee_id,
+        employee_name=employee["name"],
+        role=employee["role"],
+        onboarding_path=onboarding_steps,
+        skills_gaps=skill_gaps,
+        learning_modules=learning_modules,
+        scenarios=scenarios
+    )
